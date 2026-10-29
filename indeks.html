@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI: Menyusun dan Mengurai Bentuk Bangun - MI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'islamic-green': '#046A38',
+                        'islamic-gold': '#D4AF37',
+                        'soft-green': '#E8F5E9',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'arabic': ['Amiri', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Tone.js for Sound Effects & Backsound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* Custom Styles & Animations */
+        body { -webkit-tap-highlight-color: transparent; }
+        .hide { display: none !important; }
+        /* Drop zone styles */
+        .drop-zone { border: 2px dashed #046A38; min-height: 60px; transition: all 0.3s; }
+        .drop-zone.highlight { background-color: #E8F5E9; border-color: #D4AF37; }
+
+        /* Marquee Animation for Running Text */
+        .marquee-wrapper {
+            width: 100%;
+            overflow: hidden;
+            background-color: #046A38;
+            color: #FFFFFF;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            border-top: 2px solid #D4AF37;
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #report-content, #report-content * { visibility: visible; }
+            #report-content { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans h-screen w-screen overflow-hidden flex items-center justify-center">
+
+    <!-- APP CONTAINER -->
+    <div id="app-container" class="relative w-full h-full max-w-5xl md:h-[90vh] md:rounded-2xl md:shadow-2xl overflow-hidden bg-white flex flex-col">
+        
+        <!-- 1. SPLASH SCREEN -->
+        <div id="splash-screen" class="absolute inset-0 bg-islamic-green flex flex-col items-center justify-center z-50 text-white">
+            <img src="https://iili.io/nvQaYba.md.jpg" alt="Logo" class="w-32 h-32 rounded-full border-4 border-islamic-gold object-cover mb-4 floating shadow-xl">
+            <h1 class="text-3xl font-bold text-center tracking-wide">MATH-MI</h1>
+            <p class="mt-2 text-islamic-gold">Cinta Lingkungan, Gemar Berhitung</p>
+            <div class="mt-8 w-16 h-1 bg-white/30 rounded overflow-hidden">
+                <div class="w-full h-full bg-islamic-gold animate-[progress_1.5s_ease-in-out_forwards]"></div>
+            </div>
+        </div>
+
+        <!-- 2. COVER PAGE -->
+        <div id="cover-page" class="absolute inset-0 bg-gradient-to-br from-soft-green to-white flex flex-col items-center justify-center p-6 z-40 hide">
+            <div class="text-center slide-up mb-8">
+                <img src="https://iili.io/nvQaYba.md.jpg" alt="Logo Kecil" class="w-16 h-16 rounded-full border-2 border-islamic-gold object-cover mx-auto mb-4 shadow-md">
+                <span class="inline-block py-1 px-3 rounded-full bg-islamic-green text-white text-xs font-bold mb-3 shadow-md">Matematika • Kelas I / Fase A</span>
+                <h1 class="text-3xl md:text-5xl font-bold text-islamic-green mb-6 leading-tight">Menyusun dan Mengurai<br><span class="text-islamic-gold">Bentuk Bangun</span></h1>
+                
+                <!-- Interactive SVG -->
+                <div class="w-48 h-48 mx-auto mb-8 relative floating">
+                    <svg id="cover-svg" viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl">
+                        <polygon points="50,10 90,90 10,90" fill="#046A38" class="opacity-80" />
+                        <rect x="25" y="40" width="50" height="50" fill="#D4AF37" class="opacity-90 shape-spin" />
+                        <circle cx="50" cy="65" r="15" fill="#ffffff" />
+                    </svg>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="playSfx('click'); showModal('modal-info')" class="px-5 py-3 rounded-full border-2 border-islamic-green text-islamic-green font-semibold hover:bg-islamic-green hover:text-white transition shadow-sm"><i class="fas fa-user-tie mr-2"></i>Pengembang</button>
+                    <button onclick="playSfx('click'); showModal('modal-tujuan')" class="px-5 py-3 rounded-full border-2 border-islamic-gold text-islamic-green font-semibold hover:bg-islamic-gold hover:text-white transition shadow-sm"><i class="fas fa-bullseye mr-2"></i>Tujuan</button>
+                    <button onclick="navigateTo('login-page')" class="px-8 py-3 rounded-full bg-islamic-green text-white font-bold text-lg hover:bg-green-800 transition shadow-lg animate-[pulse-glow_2s_infinite]"><i class="fas fa-play mr-2"></i>MULAI</button>
+                </div>
+            </div>
+
+            <!-- RUNNING TEXT (MARQUEE) -->
+            <div class="marquee-wrapper">
+                <div class="marquee-content">
+                    <i class="fas fa-info-circle text-islamic-gold mr-2"></i> 
+                    <span class="text-islamic-gold">MATA PELAJARAN:</span> Matematika Kelas I / Fase A &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-islamic-gold">PENGEMBANG:</span> Fatmawati Batahai, S.Pd., Gr. (MI Alkhairaat Tilamuta) &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-islamic-gold">TUJUAN PEMBELAJARAN:</span> Mendeskripsikan benda berdasarkan bentuk, Mengelompokkan benda, Menyusun dan mengurai bentuk bangun.
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: INFO PENGEMBANG -->
+        <div id="modal-info" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+            <div class="glass-modal rounded-3xl p-6 md:p-8 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 modal-content">
+                <div class="w-24 h-24 mx-auto rounded-full border-4 border-islamic-gold overflow-hidden mb-4 shadow-lg bg-gray-200">
+                    <img src="https://iili.io/nvQaYba.md.jpg" alt="Fatmawati Batahai" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23046A38\'/><text x=\'50\' y=\'50\' font-family=\'Arial\' font-size=\'40\' fill=\'white\' text-anchor=\'middle\' dominant-baseline=\'central\'>FB</text></svg>'">
+                </div>
+                <h3 class="text-xl font-bold text-islamic-green">Fatmawati Batahai, S.Pd., Gr.</h3>
+                <p class="text-gray-600 mb-1">MI Alkhairaat Tilamuta</p>
+                <p class="text-xs text-gray-500 mb-6 break-all">fatmawati_40502708190003@madrasah.kemenag.go.id</p>
+                <button onclick="playSfx('click'); hideModal('modal-info')" class="w-full py-2 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition">Kembali ke Cover</button>
+            </div>
+        </div>
+
+        <!-- MODAL: TUJUAN -->
+        <div id="modal-tujuan" class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+            <div class="glass-modal rounded-3xl p-6 md:p-8 max-w-md w-full transform scale-95 transition-transform duration-300 modal-content">
+                <div class="text-center mb-4">
+                    <div class="w-12 h-12 bg-islamic-gold text-white rounded-full flex items-center justify-center mx-auto mb-2 text-2xl shadow-md"><i class="fas fa-graduation-cap"></i></div>
+                    <h3 class="text-xl font-bold text-islamic-green">Tujuan Pembelajaran</h3>
+                </div>
+                <ul class="list-disc pl-5 text-gray-700 mb-4 space-y-2 text-sm">
+                    <li>Mendeskripsikan benda berdasarkan bentuk.</li>
+                    <li>Mengelompokkan benda.</li>
+                    <li>Menyusun dan mengurai bentuk bangun.</li>
+                </ul>
+                <div class="bg-soft-green p-3 rounded-xl mb-6 text-center border border-green-200">
+                    <p class="font-arabic text-xl text-islamic-green mb-1" dir="rtl">ٱلَّذِى خَلَقَ سَبْعَ سَمَٰوَٰتٍ طِبَاقًا</p>
+                    <p class="text-xs text-gray-600 italic">"Yang telah menciptakan tujuh langit berlapis-lapis..." (Al-Mulk: 3)</p>
+                    <p class="text-xs text-islamic-green mt-2 font-semibold">Berbasis Cinta: Mensyukuri keteraturan bentuk ciptaan Allah di alam sekitar kita.</p>
+                </div>
+                <button onclick="playSfx('click'); hideModal('modal-tujuan')" class="w-full py-2 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition">Kembali ke Cover</button>
+            </div>
+        </div>
+
+        <!-- 3. LOGIN FORM -->
+        <div id="login-page" class="absolute inset-0 bg-white flex flex-col z-30 hide">
+            <div class="h-1/3 bg-islamic-green rounded-b-[3rem] p-8 flex flex-col justify-end">
+                <h2 class="text-3xl font-bold text-white mb-2">Halo Sahabat!</h2>
+                <p class="text-green-100">Mari mulai petualangan belajarmu.</p>
+            </div>
+            <div class="flex-1 px-8 pt-8 -mt-6">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap</label>
+                        <input type="text" id="input-nama" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-islamic-green focus:ring-1 focus:ring-islamic-green transition" placeholder="Masukkan namamu...">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Kelas</label>
+                        <select id="input-kelas" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-islamic-green focus:ring-1 focus:ring-islamic-green transition bg-white">
+                            <option value="">Pilih Kelas...</option>
+                            <option value="I-A">Kelas I-A</option>
+                            <option value="I-B">Kelas I-B</option>
+                        </select>
+                    </div>
+                    <button onclick="saveIdentity()" class="w-full py-3 bg-islamic-green text-white font-bold rounded-xl hover:bg-green-800 transition shadow-md">Simpan & Lanjut</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. PENGANTAR (INTRO SLIDER) -->
+        <div id="intro-page" class="absolute inset-0 bg-white flex flex-col z-20 hide">
+            <div class="p-6 flex justify-between items-center bg-soft-green border-b border-green-200">
+                <h2 class="font-bold text-islamic-green" id="intro-greeting">Selamat Datang!</h2>
+                <span class="text-sm font-semibold text-islamic-gold">Panduan</span>
+            </div>
+            <div class="flex-1 relative overflow-hidden">
+                <div id="intro-slider" class="w-full h-full flex transition-transform duration-500">
+                    <!-- Slide 1 -->
+                    <div class="w-full h-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                        <img src="https://placehold.co/200x200/046A38/FFFFFF?text=Belajar" class="w-48 h-48 rounded-full mb-6 shadow-lg object-cover" alt="Belajar">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Tahap 1: Belajar</h3>
+                        <p class="text-gray-600">Pelajari bentuk-bentuk bangun di sekitarmu, seperti atap rumah adat dan indahnya Danau Limboto. Selesaikan tantangan kecil di tiap materi!</p>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="w-full h-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                        <img src="https://placehold.co/200x200/D4AF37/FFFFFF?text=Bermain" class="w-48 h-48 rounded-full mb-6 shadow-lg object-cover" alt="Bermain">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Tahap 2: Bermain</h3>
+                        <p class="text-gray-600">Setelah belajar, kunci menu Bermain akan terbuka! Kerjakan 10 tantangan seru menyusun dan mengurai bangun.</p>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="w-full h-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                        <img src="https://placehold.co/200x200/2563EB/FFFFFF?text=Berlatih" class="w-48 h-48 rounded-full mb-6 shadow-lg object-cover" alt="Berlatih">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Tahap 3: Berlatih</h3>
+                        <p class="text-gray-600">Uji kemampuanmu di tahap akhir dan dapatkan Laporan Hasil Belajar yang bisa dicetak. Semoga sukses, dengan niat ikhlas karena Allah!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-white border-t border-gray-100 flex justify-between items-center">
+                <div class="flex space-x-2" id="intro-dots">
+                    <div class="w-3 h-3 rounded-full bg-islamic-green"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="btn-intro-prev" onclick="moveIntro(-1)" class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hide">Kembali</button>
+                    <button id="btn-intro-next" onclick="moveIntro(1)" class="px-6 py-2 rounded-lg bg-islamic-green text-white font-semibold">Selanjutnya</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MAIN MENU (DASHBOARD) -->
+        <div id="main-menu" class="absolute inset-0 bg-gray-50 flex flex-col z-10 hide overflow-y-auto pb-10">
+            <!-- Header Profile -->
+            <div class="bg-islamic-green pt-8 pb-12 px-6 rounded-b-[2rem] text-white shadow-md relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-green-200 text-sm">Ahlan wa Sahlan,</p>
+                        <h2 class="text-2xl font-bold" id="menu-student-name">Siswa</h2>
+                        <p class="text-sm bg-black/20 inline-block px-2 py-1 rounded mt-1" id="menu-student-class">Kelas</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-islamic-green text-xl shadow-inner">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <div class="absolute -bottom-6 left-6 right-6 bg-white rounded-xl shadow-lg p-4 flex justify-around items-center border border-gray-100">
+                    <div class="text-center"><div class="text-xs text-gray-500">Materi</div><div class="font-bold text-islamic-green" id="stat-materi">0/8</div></div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="text-center"><div class="text-xs text-gray-500">Bermain</div><div class="font-bold text-islamic-gold" id="stat-bermain">0%</div></div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="text-center"><div class="text-xs text-gray-500">Nilai</div><div class="font-bold text-blue-600" id="stat-nilai">-</div></div>
+                </div>
+            </div>
+
+            <!-- Menu Cards -->
+            <div class="px-6 mt-14 space-y-4">
+                <h3 class="font-bold text-gray-700 mb-2">Pilih Aktivitas:</h3>
+                
+                <!-- Menu 1: Belajar -->
+                <button onclick="openMenu('belajar')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center transition hover:shadow-md text-left group relative overflow-hidden">
+                    <div class="w-16 h-16 rounded-xl bg-green-100 text-islamic-green flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition"><i class="fas fa-book-open"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg text-gray-800">1. BELAJAR</h4>
+                        <p class="text-xs text-gray-500">Materi interaktif & nilai KBC</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-islamic-green text-white flex items-center justify-center"><i class="fas fa-unlock"></i></div>
+                </button>
+
+                <!-- Menu 2: Bermain -->
+                <button onclick="openMenu('bermain')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center transition text-left group relative overflow-hidden" id="card-bermain">
+                    <div class="w-16 h-16 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center text-2xl mr-4 transition" id="icon-bermain"><i class="fas fa-gamepad"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg text-gray-400" id="title-bermain">2. BERMAIN</h4>
+                        <p class="text-xs text-gray-400" id="desc-bermain">Selesaikan Belajar dulu</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center" id="lock-bermain"><i class="fas fa-lock"></i></div>
+                </button>
+
+                <!-- Menu 3: Berlatih -->
+                <button onclick="openMenu('berlatih')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center transition text-left group relative overflow-hidden" id="card-berlatih">
+                    <div class="w-16 h-16 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center text-2xl mr-4 transition" id="icon-berlatih"><i class="fas fa-pencil-alt"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg text-gray-400" id="title-berlatih">3. BERLATIH</h4>
+                        <p class="text-xs text-gray-400" id="desc-berlatih">Selesaikan Bermain dulu</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center" id="lock-berlatih"><i class="fas fa-lock"></i></div>
+                </button>
+
+                <!-- Menu 4: Referensi -->
+                <button onclick="openMenu('referensi')" class="w-full bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center transition hover:shadow-md text-left group relative overflow-hidden">
+                    <div class="w-16 h-16 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition"><i class="fas fa-book-open"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-lg text-gray-800">4. REFERENSI</h4>
+                        <p class="text-xs text-gray-500">Buku teks & Video animasi</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center"><i class="fas fa-chevron-right"></i></div>
+                </button>
+            </div>
+            
+            <div class="mt-8 text-center px-6 hide" id="btn-cetak-wrapper">
+                <button onclick="generatePDF()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-md"><i class="fas fa-print mr-2"></i>Cetak Laporan PDF</button>
+            </div>
+        </div>
+
+        <!-- 6. BELAJAR PAGE (8 Slides) -->
+        <div id="belajar-page" class="absolute inset-0 bg-gray-50 flex flex-col z-20 hide">
+            <!-- Header -->
+            <div class="bg-islamic-green p-4 text-white flex items-center shadow-md">
+                <button onclick="navigateTo('main-menu')" class="w-10 h-10 rounded-full hover:bg-black/20 flex items-center justify-center mr-2"><i class="fas fa-arrow-left"></i></button>
+                <div class="flex-1">
+                    <h2 class="font-bold">Materi Belajar</h2>
+                    <p class="text-xs text-green-200" id="belajar-progress">Slide 1 dari 8</p>
+                </div>
+            </div>
+            <!-- Content Area (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6" id="belajar-content">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+
+        <!-- 7. BERMAIN PAGE (10 Tasks) -->
+        <div id="bermain-page" class="absolute inset-0 bg-blue-50 flex flex-col z-20 hide">
+            <div class="bg-islamic-gold p-4 text-white flex items-center shadow-md">
+                <button onclick="confirmExit('bermain')" class="w-10 h-10 rounded-full hover:bg-black/20 flex items-center justify-center mr-2"><i class="fas fa-home"></i></button>
+                <div class="flex-1">
+                    <h2 class="font-bold text-gray-800">Tantangan Bermain</h2>
+                    <div class="w-full bg-black/10 h-2 rounded-full mt-1">
+                        <div class="bg-white h-2 rounded-full" id="bermain-bar" style="width: 10%"></div>
+                    </div>
+                </div>
+                <div class="ml-4 font-bold text-gray-800 bg-white/30 px-3 py-1 rounded-lg" id="bermain-counter">1/10</div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 pb-24" id="bermain-content">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+
+        <!-- 8. BERLATIH PAGE (10 Assessment Questions) -->
+        <div id="berlatih-page" class="absolute inset-0 bg-purple-50 flex flex-col z-20 hide">
+            <div class="bg-blue-600 p-4 text-white flex items-center shadow-md">
+                <button onclick="confirmExit('berlatih')" class="w-10 h-10 rounded-full hover:bg-black/20 flex items-center justify-center mr-2"><i class="fas fa-home"></i></button>
+                <div class="flex-1">
+                    <h2 class="font-bold">Evaluasi Mandiri</h2>
+                    <div class="w-full bg-black/10 h-2 rounded-full mt-1">
+                        <div class="bg-white h-2 rounded-full" id="berlatih-bar" style="width: 10%"></div>
+                    </div>
+                </div>
+                 <div class="ml-4 font-bold bg-white/20 px-3 py-1 rounded-lg" id="berlatih-counter">1/10</div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 pb-24" id="berlatih-content">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+
+        <!-- 9. REFERENSI PAGE -->
+        <div id="referensi-page" class="absolute inset-0 bg-teal-50 flex flex-col z-20 hide">
+            <div class="bg-teal-600 p-4 text-white flex items-center shadow-md">
+                <button onclick="navigateTo('main-menu')" class="w-10 h-10 rounded-full hover:bg-black/20 flex items-center justify-center mr-2"><i class="fas fa-arrow-left"></i></button>
+                <div class="flex-1">
+                    <h2 class="font-bold">Referensi & Sumber Belajar</h2>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                <!-- Item 1: Buku CIBI -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 flex items-start">
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xl mr-4 flex-shrink-0"><i class="fas fa-book-reader"></i></div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">1. Buku Teks Matematika CIBI</h4>
+                        <p class="text-sm text-gray-600 mt-1">Sumber referensi pengayaan untuk anak Cerdas Istimewa Bakat Istimewa (CIBI). Memuat materi mendalam tentang cara kreatif menyusun dan mengurai bentuk bangun di alam sekitar.</p>
+                    </div>
+                </div>
+                <!-- Item 2: Buku Kemendikdasmen -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 flex items-start">
+                    <div class="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-xl mr-4 flex-shrink-0"><i class="fas fa-book"></i></div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">2. Buku Matematika Kemendikdasmen</h4>
+                        <p class="text-sm text-gray-600 mt-1">Buku teks utama Kurikulum Nasional dari Kementerian Pendidikan Dasar dan Menengah RI untuk Kelas I / Fase A. Digunakan sebagai rujukan dasar pencapaian kompetensi.</p>
+                    </div>
+                </div>
+                <!-- Item 3: Video Animasi -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 flex items-start flex-col">
+                    <div class="flex items-center mb-3 w-full">
+                        <div class="w-12 h-12 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-xl mr-4 flex-shrink-0"><i class="fas fa-play"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">3. Video Animasi Mengenal Bentuk</h4>
+                            <p class="text-sm text-gray-600 mt-1">Animasi visual interaktif untuk memudahkan pemahaman ananda tentang berbagai macam bentuk bangun datar di kehidupan sehari-hari.</p>
+                        </div>
+                    </div>
+                    <!-- YouTube Video Embed -->
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-gray-200 border border-gray-300">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/AnoNb2OMQ6s" title="Video Edukasi Bentuk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIDDEN REPORT CONTAINER FOR PDF GENERATION -->
+        <div id="report-container" class="hide bg-white text-black p-8 max-w-[800px] mx-auto text-sm">
+            <div id="report-content" class="bg-white p-8">
+                <!-- Header Laporan -->
+                <div class="border-b-4 border-islamic-green pb-4 mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-islamic-green uppercase">Laporan Hasil Belajar MPI</h1>
+                        <h2 class="text-lg font-semibold text-gray-700">Materi: Menyusun dan Mengurai Bentuk Bangun</h2>
+                        <p class="text-sm text-gray-500">Fase A / Kelas I - Kemenag RI</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-sm">Dikembangkan Oleh:</p>
+                        <p class="text-sm">Fatmawati Batahai, S.Pd., Gr.</p>
+                        <p class="text-xs text-gray-500">MI Alkhairaat Tilamuta</p>
+                    </div>
+                </div>
+                
+                <!-- Data Siswa -->
+                <div class="bg-gray-100 p-4 rounded-lg mb-6 flex justify-between">
+                    <div><span class="text-gray-600 font-semibold">Nama Siswa:</span> <span id="rep-nama" class="font-bold"></span></div>
+                    <div><span class="text-gray-600 font-semibold">Kelas:</span> <span id="rep-kelas" class="font-bold"></span></div>
+                    <div><span class="text-gray-600 font-semibold">Tanggal:</span> <span id="rep-tanggal" class="font-bold"></span></div>
+                </div>
+
+                <!-- Performa -->
+                <div class="flex gap-6 mb-6">
+                    <div class="flex-1 border rounded-lg p-4">
+                        <h3 class="font-bold border-b pb-2 mb-2"><i class="fas fa-gamepad text-gray-400 mr-2"></i>Rekap Bermain</h3>
+                        <p>Tantangan Selesai: <span class="font-bold">10/10</span></p>
+                        <p>Skor Keaktifan: <span id="rep-skor-main" class="font-bold text-islamic-gold text-xl"></span>/100</p>
+                    </div>
+                    <div class="flex-1 border rounded-lg p-4 bg-soft-green border-islamic-green">
+                        <h3 class="font-bold border-b border-green-200 pb-2 mb-2 text-islamic-green"><i class="fas fa-star mr-2"></i>Hasil Asesmen (Berlatih)</h3>
+                        <p>Nilai Akhir: <span id="rep-skor-latih" class="font-bold text-islamic-green text-3xl block text-center my-2"></span></p>
+                        <p class="text-center font-bold text-lg" id="rep-predikat"></p>
+                    </div>
+                </div>
+
+                <!-- Analisis Level -->
+                <h3 class="font-bold mb-2">Analisis Penguasaan Kognitif:</h3>
+                <table class="w-full border-collapse border border-gray-300 mb-6 text-left">
+                    <tr class="bg-gray-100"><th class="border p-2">Level Soal</th><th class="border p-2">Nomor</th><th class="border p-2">Benar</th><th class="border p-2">Keterangan</th></tr>
+                    <tr><td class="border p-2">Level 1 (Dasar)</td><td class="border p-2">1, 2, 3</td><td class="border p-2 font-bold" id="rep-l1"></td><td class="border p-2">Pemahaman konsep dasar bangun.</td></tr>
+                    <tr><td class="border p-2">Level 2 (Penerapan)</td><td class="border p-2">4, 5, 6, 7</td><td class="border p-2 font-bold" id="rep-l2"></td><td class="border p-2">Penerapan pada konteks lokal Gorontalo.</td></tr>
+                    <tr><td class="border p-2">Level 3 (HOTS)</td><td class="border p-2">8, 9, 10</td><td class="border p-2 font-bold" id="rep-l3"></td><td class="border p-2">Penalaran tingkat tinggi & pemecahan masalah.</td></tr>
+                </table>
+
+                <!-- Catatan KBC -->
+                <div class="border-l-4 border-islamic-gold pl-4 py-2 mb-8">
+                    <h3 class="font-bold text-islamic-gold mb-1">Catatan Kurikulum Berbasis Cinta (KBC):</h3>
+                    <p class="italic text-gray-700">Ananda <span class="rep-nama-panggil font-bold"></span> telah menunjukkan nilai kasih sayang terhadap lingkungan alam (Danau Limboto, laut), menghargai kearifan lokal Gorontalo, dan mensyukuri penciptaan Allah dalam bentuk bangun yang teratur, sesuai tuntunan Al-Qur'an.</p>
+                </div>
+                
+                <!-- TTD -->
+                <div class="flex justify-end mt-12">
+                    <div class="text-center">
+                        <p>Gorontalo, <span class="rep-tanggal-ttd"></span></p>
+                        <p class="mb-16">Guru Kelas / Fasilitator</p>
+                        <p class="font-bold underline">Fatmawati Batahai, S.Pd., Gr.</p>
+                        <p class="text-xs">NIP. -</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CUSTOM ALERT MODAL -->
+        <div id="custom-alert" class="absolute inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform" id="alert-box">
+                <div id="alert-icon" class="text-4xl mb-3 text-islamic-green"><i class="fas fa-info-circle"></i></div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800" id="alert-title">Informasi</h3>
+                <p class="text-gray-600 mb-6" id="alert-message">Pesan disini</p>
+                <div id="alert-buttons" class="flex justify-center gap-3">
+                    <button id="alert-btn-ok" class="px-6 py-2 bg-islamic-green text-white font-bold rounded-lg w-full">Mengerti</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // ==========================================
+        // 🔴 KONFIGURASI DATABASE GOOGLE SHEETS 🔴
+        // ==========================================
+        // Ganti string di bawah ini dengan URL Web App Google Apps Script Anda
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx3r0faA_DW3xrrJ6KAnzbRiFzWuqacToEQyxXRjl4pq_ELA-NijBz3eW_KmbR0Cg/exec"; 
+        // ==========================================
+
+        // --- 1. STATE MANAGEMENT ---
+        let state = {
+            student: { name: "", class: "" },
+            progress: { belajar: false, bermain: false, berlatih: false },
+            belajar: { currentSlide: 0 },
+            bermain: { currentTask: 0, score: 0, correctAnswers: 0 },
+            // Menambahkan state 'answers' untuk menyimpan detail jawaban siswa
+            berlatih: { currentTask: 0, score: 0, l1: 0, l2: 0, l3: 0, answers: [] } 
+        };
+
+        // --- AUDIO SYSTEM (Tone.js) ---
+        let isAudioInit = false;
+        let sfx = {};
+        
+        async function initAudio() {
+            if (isAudioInit) return;
+            await Tone.start();
+            
+            // SFX Synthesizers
+            sfx.click = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }, volume: -10 }).toDestination();
+            sfx.transition = new Tone.FMSynth({ modulationIndex: 12.22, envelope: { attack: 0.01, decay: 0.2 }, volume: -15 }).toDestination();
+            sfx.correct = new Tone.PolySynth(Tone.Synth, { volume: -10 }).toDestination();
+            sfx.wrong = new Tone.Synth({ oscillator: { type: 'sawtooth' }, envelope: { attack: 0.05, decay: 0.2, sustain: 0.1, release: 0.2 }, volume: -15 }).toDestination();
+            
+            // Background Music (Soft Generative Chords)
+            const bgMusic = new Tone.PolySynth(Tone.Synth, { volume: -25 }).toDestination();
+            const chords = [['C4', 'E4', 'G4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4']];
+            let chordIdx = 0;
+            Tone.Transport.scheduleRepeat(time => {
+                bgMusic.triggerAttackRelease(chords[chordIdx % 4], "2n", time);
+                chordIdx++;
+            }, "1m");
+            Tone.Transport.start();
+            
+            isAudioInit = true;
+        }
+
+        function playSfx(type) {
+            if (!isAudioInit) return;
+            const now = Tone.now();
+            if (type === 'click') sfx.click.triggerAttackRelease("C6", "32n");
+            else if (type === 'transition') sfx.transition.triggerAttackRelease("C5", "16n");
+            else if (type === 'correct') {
+                sfx.correct.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
+                sfx.correct.triggerAttackRelease("C6", "4n", now + 0.1);
+            } else if (type === 'wrong') {
+                sfx.wrong.triggerAttackRelease("Eb3", "8n", now);
+                sfx.wrong.triggerAttackRelease("C3", "4n", now + 0.15);
+            }
+        }
+
+        // Initialize audio on first click anywhere
+        document.body.addEventListener('click', initAudio, { once: true });
+
+        // UI Helpers
+        const $ = id => document.getElementById(id);
+        const hide = id => $(id).classList.add('hide');
+        const show = id => $(id).classList.remove('hide');
+        const showFlex = id => { $(id).classList.remove('hide'); $(id).style.display = 'flex'; };
+
+        function navigateTo(pageId) {
+            playSfx('transition');
+            ['cover-page', 'login-page', 'intro-page', 'main-menu', 'belajar-page', 'bermain-page', 'berlatih-page', 'referensi-page'].forEach(id => hide(id));
+            showFlex(pageId);
+        }
+
+        function showModal(id) {
+            const modal = $(id);
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.querySelector('.modal-content').classList.remove('scale-95');
+            modal.querySelector('.modal-content').classList.add('scale-100');
+        }
+        function hideModal(id) {
+            const modal = $(id);
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.querySelector('.modal-content').classList.remove('scale-100');
+            modal.querySelector('.modal-content').classList.add('scale-95');
+        }
+
+        function customAlert(title, message, type = 'info', onOk = null, showCancel = false, onCancel = null) {
+            $('alert-title').innerText = title;
+            $('alert-message').innerText = message;
+            const icon = $('alert-icon');
+            if(type === 'error') { icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>'; }
+            else if(type === 'success') { icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>'; }
+            else if(type === 'warning') { icon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>'; }
+            else { icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>'; }
+
+            const btnContainer = $('alert-buttons');
+            btnContainer.innerHTML = '';
+            
+            if(showCancel) {
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-lg flex-1";
+                btnCancel.innerText = "Batal";
+                btnCancel.onclick = () => { $('custom-alert').style.display = 'none'; if(onCancel) onCancel(); };
+                btnContainer.appendChild(btnCancel);
+            }
+            const btnOk = document.createElement('button');
+            btnOk.className = `px-4 py-2 font-bold rounded-lg flex-1 text-white ${type==='error'?'bg-red-500': type==='warning'?'bg-yellow-500':'bg-islamic-green'}`;
+            btnOk.innerText = showCancel ? "Ya, Yakin" : "Mengerti";
+            btnOk.onclick = () => { $('custom-alert').style.display = 'none'; if(onOk) onOk(); };
+            btnContainer.appendChild(btnOk);
+
+            $('custom-alert').style.display = 'flex';
+        }
+
+        // --- 2. INITIALIZATION ---
+        window.onload = () => {
+            setTimeout(() => {
+                hide('splash-screen');
+                navigateTo('cover-page');
+            }, 2000);
+        };
+
+        // --- 3. LOGIN & INTRO ---
+        function saveIdentity() {
+            playSfx('click');
+            const nama = $('input-nama').value.trim();
+            const kelas = $('input-kelas').value;
+            if(!nama || !kelas) {
+                customAlert('Gagal', 'Tolong isi Nama dan Kelasmu ya, Nak!', 'error');
+                return;
+            }
+            state.student.name = nama;
+            state.student.class = kelas;
+            $('intro-greeting').innerText = `Ahlan, ${nama}!`;
+            $('menu-student-name').innerText = nama;
+            $('menu-student-class').innerText = kelas;
+            navigateTo('intro-page');
+        }
+
+        let introCurrent = 0;
+        function moveIntro(dir) {
+            playSfx('click');
+            introCurrent += dir;
+            if (introCurrent < 0) introCurrent = 0;
+            if (introCurrent > 2) {
+                navigateTo('main-menu');
+                updateMenuUI();
+                return;
+            }
+            $('intro-slider').style.transform = `translateX(-${introCurrent * 100}%)`;
+            
+            // Dots update
+            const dots = $('intro-dots').children;
+            for(let i=0; i<3; i++) {
+                dots[i].className = i === introCurrent ? "w-3 h-3 rounded-full bg-islamic-green" : "w-3 h-3 rounded-full bg-gray-300";
+            }
+            
+            if(introCurrent === 0) { hide('btn-intro-prev'); } else { show('btn-intro-prev'); }
+            if(introCurrent === 2) { $('btn-intro-next').innerText = 'Ke Menu Utama'; $('btn-intro-next').classList.replace('bg-islamic-green', 'bg-islamic-gold'); } 
+            else { $('btn-intro-next').innerText = 'Selanjutnya'; $('btn-intro-next').classList.replace('bg-islamic-gold', 'bg-islamic-green'); }
+        }
+
+        // --- 4. MAIN MENU LOGIC ---
+        function updateMenuUI() {
+            // Bermain Logic
+            if(state.progress.belajar) {
+                $('icon-bermain').className = "w-16 h-16 rounded-xl bg-yellow-100 text-islamic-gold flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition";
+                $('title-bermain').className = "font-bold text-lg text-gray-800";
+                $('desc-bermain').innerText = "10 Tantangan seru menantimu!";
+                $('desc-bermain').className = "text-xs text-gray-500";
+                $('lock-bermain').innerHTML = '<i class="fas fa-unlock"></i>';
+                $('lock-bermain').className = "w-8 h-8 rounded-full bg-islamic-gold text-white flex items-center justify-center";
+            }
+            // Berlatih Logic
+            if(state.progress.bermain) {
+                $('icon-berlatih').className = "w-16 h-16 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition";
+                $('title-berlatih').className = "font-bold text-lg text-gray-800";
+                $('desc-berlatih').innerText = "Asesmen akhir 100 poin.";
+                $('desc-berlatih').className = "text-xs text-gray-500";
+                $('lock-berlatih').innerHTML = '<i class="fas fa-unlock"></i>';
+                $('lock-berlatih').className = "w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center";
+            }
+            if(state.progress.berlatih) {
+                show('btn-cetak-wrapper');
+            }
+        }
+
+        function openMenu(menu) {
+            playSfx('click');
+            if (menu === 'belajar') {
+                renderBelajar();
+                navigateTo('belajar-page');
+            } else if (menu === 'bermain') {
+                if(!state.progress.belajar) { customAlert('Terkunci', 'Selesaikan materi BELAJAR terlebih dahulu ya!', 'warning'); return; }
+                state.bermain.currentTask = 0; state.bermain.score = 0; state.bermain.correctAnswers = 0;
+                renderBermain(); navigateTo('bermain-page');
+            } else if (menu === 'berlatih') {
+                if(!state.progress.bermain) { customAlert('Terkunci', 'Selesaikan tantangan BERMAIN terlebih dahulu ya!', 'warning'); return; }
+                state.berlatih.currentTask = 0; state.berlatih.score = 0; state.berlatih.l1 = 0; state.berlatih.l2 = 0; state.berlatih.l3 = 0; state.berlatih.answers = [];
+                renderBerlatih(); navigateTo('berlatih-page');
+            } else if (menu === 'referensi') {
+                navigateTo('referensi-page');
+            }
+        }
+
+        function confirmExit(menu) {
+            playSfx('click');
+            customAlert('Keluar?', 'Progres di sesi ini mungkin akan diulang dari awal. Yakin kembali ke menu?', 'warning', () => { navigateTo('main-menu'); }, true);
+        }
+
+        // --- 5. DATA MATERI (BELAJAR) ---
+        const dataBelajar = [
+            {
+                title: "Mengenal Segitiga dan Segi Empat",
+                context: "Pernahkah kamu melihat atap <b>Rumah Adat Dulohupa</b> di Gorontalo? Atapnya berbentuk <b>Segitiga</b>. Sedangkan dindingnya banyak yang berbentuk <b>Segi Empat</b> (Persegi dan Persegi Panjang).",
+                kbc: "Cinta Budaya: Kita harus bangga dan merawat peninggalan budaya daerah kita.",
+                quranAr: "إِنَّا كُلَّ شَىْءٍ خَلَقْنَٰهُ بِقَدَرٍ",
+                quranId: "Sesungguhnya Kami menciptakan segala sesuatu menurut ukuran. (Al-Qamar: 49)",
+                quranDesc: "Allah menciptakan bentuk segitiga dan segi empat dengan ukuran yang pas agar bangunan menjadi kokoh.",
+                quiz: { type: 'mc', q: "Bentuk apakah atap Rumah Adat Dulohupa?", options: ["Lingkaran", "Segitiga", "Kubus"], ans: 1 }
+            },
+            {
+                title: "Lingkaran di Alam",
+                context: "Coba amati indahnya <b>Danau Limboto</b> saat matahari terbenam. Matahari tampak seperti <b>Lingkaran</b> yang sempurna di ufuk barat. Riak air saat nelayan melempar jaring juga membentuk lingkaran.",
+                kbc: "Cinta Alam: Mari kita jaga kebersihan Danau Limboto agar ikan-ikan bisa hidup dengan baik.",
+                quranAr: "وَالشَّمْسُ تَجْرِي لِمُسْتَقَرٍّ لَّهَا",
+                quranId: "Dan matahari berjalan di tempat peredarannya. (Ya Sin: 38)",
+                quranDesc: "Bentuk lingkaran yang bulat sempurna memudahkan pergerakan ciptaan Allah di semesta.",
+                quiz: { type: 'mc', q: "Benda di alam yang berbentuk lingkaran sempurna adalah...", options: ["Matahari", "Daun Kelapa", "Batu Bata"], ans: 0 }
+            },
+            {
+                title: "Menyusun Bangun Datar",
+                context: "Di pesisir <b>Teluk Tomini</b>, banyak nelayan menggunakan <i>Perahu Bodi</i>. Kita bisa menggambar perahu dengan menyusun bangun datar. 1 Setengah Lingkaran untuk badan perahu, dan 1 Segitiga untuk layar.",
+                kbc: "Cinta Sesama: Nelayan bekerja keras mencari ikan bergizi (seperti ikan Tuna) untuk kita makan.",
+                quranAr: "وَتَعَاوَنُوا۟ عَلَى ٱلْبِرِّ وَٱلتَّقْوَىٰ",
+                quranId: "Dan tolong-menolonglah kamu dalam (mengerjakan) kebajikan dan takwa... (Al-Ma'idah: 2)",
+                quranDesc: "Seperti bangun yang disusun bersama menjadi bentuk baru, kita juga harus bekerjasama.",
+                quiz: { type: 'mc', q: "Bangun apa yang cocok menjadi layar perahu nelayan?", options: ["Lingkaran", "Persegi Panjang", "Segitiga"], ans: 2 }
+            },
+            {
+                title: "Mengurai Bangun Datar",
+                context: "Ibu memiliki ladang jagung untuk membuat <b>Binthe Biluhuta</b> (Milu Siram). Ladang ibu berbentuk 1 Persegi Panjang besar. Ibu membaginya menjadi 2 bagian berbentuk Persegi agar mudah disiram.",
+                kbc: "Cinta Tanah Air: Petani jagung Gorontalo menyediakan makanan sehat bagi bangsa.",
+                quranAr: "وَفِى ٱلْأَرْضِ قِطَعٌ مُّتَجَٰوِرَٰتٌ",
+                quranId: "Dan di bumi ini terdapat bagian-bagian yang berdampingan... (Ar-Ra'd: 4)",
+                quranDesc: "Satu lahan luas bisa diurai (dibagi) menjadi petak-petak kecil agar lebih bermanfaat.",
+                quiz: { type: 'mc', q: "Jika 1 Persegi Panjang besar dipotong di tengah, akan menjadi 2 bentuk...", options: ["Segitiga", "Persegi / Segi empat kecil", "Lingkaran"], ans: 1 }
+            },
+            {
+                title: "Mengenal Kubus dan Balok",
+                context: "Mari berkunjung ke <b>Benteng Otanaha</b>! Temboknya tersusun dari ribuan batu bata. Setiap batu bata berbentuk <b>Balok</b>. Sedangkan kotak perhiasan kuno biasanya berbentuk <b>Kubus</b>.",
+                kbc: "Tangguh: Jadilah anak yang kuat dan kokoh pendiriannya seperti susunan bata benteng.",
+                quranAr: "كَأَنَّهُم بُنْيَٰنٌ مَّرْصُوصٌ",
+                quranId: "...seakan-akan mereka bangunan yang tersusun kokoh. (As-Saff: 4)",
+                quranDesc: "Bentuk balok sangat mudah disusun rapat sehingga menjadi bangunan yang kokoh.",
+                quiz: { type: 'mc', q: "Batu bata di Benteng Otanaha berbentuk bangun ruang...", options: ["Bola", "Tabung", "Balok"], ans: 2 }
+            },
+            {
+                title: "Tabung dan Bola",
+                context: "Di desa, warga memainkan alat musik bambu <b>Polopalo</b> yang berbentuk <b>Tabung</b>. Sambil bermain, mereka minum air kelapa segar. Buah kelapa utuh menyerupai bentuk <b>Bola</b>.",
+                kbc: "Syukur: Ucapkan Alhamdulillah atas tanaman bambu dan kelapa yang banyak manfaatnya.",
+                quranAr: "فَبِأَىِّ ءَالَآءِ رَبِّكُمَا تُكَذِّبَانِ",
+                quranId: "Maka nikmat Tuhan kamu yang manakah yang kamu dustakan? (Ar-Rahman: 13)",
+                quranDesc: "Bentuk tabung pada bambu bisa menyimpan air atau menghasilkan nada indah.",
+                quiz: { type: 'mc', q: "Bambu pada alat musik Polopalo berbentuk...", options: ["Tabung", "Kubus", "Balok"], ans: 0 }
+            },
+            {
+                title: "Menyusun Bangun Ruang",
+                context: "Warga Gorontalo gemar bergotong royong. Saat ada bantuan sosial, relawan menyusun kotak-kotak mie instan (Balok) di atas mobil bak terbuka agar muat banyak dan rapi.",
+                kbc: "Empati: Menyusun barang dengan rapi memudahkan saat membantu orang yang kesusahan.",
+                quranAr: "إِنَّ ٱللَّهَ يُحِبُّ ٱلْمُحْسِنِينَ",
+                quranId: "Sesungguhnya Allah menyukai orang-orang yang berbuat baik. (Al-Baqarah: 195)",
+                quranDesc: "Menata sesuatu sesuai bentuk ruangnya mencerminkan keteraturan dan kebaikan.",
+                quiz: { type: 'mc', q: "Benda berbentuk apa yang sering disusun rapi di gudang?", options: ["Bola Karet", "Kotak/Kardus (Balok)", "Balon Udara"], ans: 1 }
+            },
+            {
+                title: "Mengurai Bangun Ruang",
+                context: "Di Pelelangan Ikan Kota Gorontalo, nelayan menurunkan tumpukan kotak es (Kubus). Tumpukan besar (Balok besar) itu diurai menjadi kotak-kotak kecil agar mudah diangkat satu per satu.",
+                kbc: "Kerja Keras: Pekerjaan berat menjadi ringan jika dikerjakan sedikit demi sedikit (diurai).",
+                quranAr: "فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا",
+                quranId: "Karena sesungguhnya sesudah kesulitan itu ada kemudahan. (Al-Insyirah: 5)",
+                quranDesc: "Masalah yang besar (bangun besar) bisa diselesaikan jika diurai menjadi bagian kecil.",
+                quiz: { type: 'mc', q: "Tumpukan 4 kotak kubus membentuk bangun ruang besar yaitu...", options: ["Balok Besar", "Tabung", "Bola"], ans: 0 }
+            }
+        ];
+
+        function renderBelajar() {
+            const slide = dataBelajar[state.belajar.currentSlide];
+            let html = `
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 slide-up">
+                    <h3 class="text-xl font-bold text-islamic-green border-b-2 border-green-100 pb-2 mb-4">${slide.title}</h3>
+                    
+                    <div class="mb-5 text-gray-700 leading-relaxed text-sm md:text-base">
+                        <img src="https://placehold.co/600x200/046A38/FFFFFF?text=Ilustrasi+${slide.title.replace(/ /g,'+')}" class="w-full h-32 md:h-48 object-cover rounded-xl mb-4" alt="Ilustrasi">
+                        <p>${slide.context}</p>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-islamic-gold p-4 rounded-r-lg mb-5">
+                        <p class="text-sm font-semibold text-islamic-gold mb-1"><i class="fas fa-heart mr-2"></i>Nilai Cinta Kemenag:</p>
+                        <p class="text-sm text-gray-700 italic">${slide.kbc}</p>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl mb-6 text-center">
+                        <p class="font-arabic text-xl md:text-2xl text-islamic-green mb-2" dir="rtl">${slide.quranAr}</p>
+                        <p class="text-xs text-gray-600 mb-2">"${slide.quranId}"</p>
+                        <p class="text-sm font-semibold text-islamic-green border-t border-green-200 pt-2 mt-2">${slide.quranDesc}</p>
+                    </div>
+
+                    <div class="bg-gray-100 p-5 rounded-2xl border border-gray-200" id="belajar-quiz-area">
+                        <p class="font-bold text-gray-800 mb-3"><i class="fas fa-question-circle text-blue-500 mr-2"></i>Uji Pemahaman:</p>
+                        <p class="mb-4 text-sm">${slide.quiz.q}</p>
+                        <div class="space-y-2">
+                            ${slide.quiz.options.map((opt, i) => `
+                                <button onclick="checkBelajar(${i}, ${slide.quiz.ans})" class="w-full text-left px-4 py-3 bg-white border border-gray-300 rounded-xl hover:bg-green-50 hover:border-islamic-green transition text-sm font-medium">
+                                    ${String.fromCharCode(65+i)}. ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('belajar-content').innerHTML = html;
+            $('belajar-progress').innerText = `Materi ${state.belajar.currentSlide + 1} dari 8`;
+            $('stat-materi').innerText = `${state.belajar.currentSlide}/8`;
+        }
+
+        function checkBelajar(selected, correct) {
+            if (selected === correct) {
+                playSfx('correct');
+                $('belajar-quiz-area').innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2"><i class="fas fa-check"></i></div>
+                        <h4 class="font-bold text-green-700 mb-4">Masya Allah, Jawabanmu Benar!</h4>
+                        <button onclick="playSfx('click'); nextBelajar()" class="px-6 py-2 bg-islamic-green text-white font-bold rounded-lg shadow-md hover:bg-green-800">Lanjut Materi</button>
+                    </div>
+                `;
+            } else {
+                playSfx('wrong');
+                customAlert('Kurang Tepat', 'Coba baca materi lagi pelan-pelan dan pilih jawaban yang lain ya.', 'error');
+            }
+        }
+
+        function nextBelajar() {
+            state.belajar.currentSlide++;
+            if (state.belajar.currentSlide >= 8) {
+                state.progress.belajar = true;
+                $('stat-materi').innerText = `8/8`;
+                customAlert('Alhamdulillah!', 'Kamu telah menyelesaikan semua materi Belajar. Sekarang menu BERMAIN sudah terbuka. Yuk, coba!', 'success', () => {
+                    updateMenuUI();
+                    navigateTo('main-menu');
+                });
+            } else {
+                renderBelajar();
+            }
+        }
+
+        // --- 6. DATA BERMAIN (10 Gamified Tasks) ---
+        const dataBermain = [
+            // Task 1: MC (Konteks Ikan Hiu Paus Botubarani)
+            { type: 'mc', stimulus: "Di desa Botubarani Gorontalo, sering muncul Ikan Hiu Paus yang besar dan ramah. Nelayan setempat menjaga laut agar hiu paus tetap hidup nyaman. Pak Nelayan membuat keramba pelindung dari jaring. Jika dilihat dari atas laut, mulut keramba itu berbentuk garis melengkung penuh tanpa sudut.", q: "Berdasarkan cerita, bentuk keramba buatan Pak Nelayan adalah...", options: ["Segitiga", "Lingkaran", "Persegi"], ans: 1 },
+            // Task 2: MC (Konteks Kain Karawo)
+            { type: 'mc', stimulus: "Kerajinan khas Gorontalo adalah Sulaman Karawo. Pengrajin mengiris serat kain dengan teliti untuk membuat motif bunga. Di tengah motif bunga tersebut, sering ditambahkan hiasan kain perca. Jika hiasan tersebut memiliki 3 sisi lurus dan 3 sudut lancip,", q: "Bentuk bangun datar apakah hiasan kain perca itu?", options: ["Segitiga", "Lingkaran", "Segi Empat"], ans: 0 },
+            // Task 3: Tap-to-Match (Susun Perahu)
+            { type: 'match', stimulus: "Amir ingin membuat mainan perahu layar tradisional pesisir Teluk Tomini dari kertas origami. Ia menyiapkan 2 potongan kertas. Kertas pertama untuk layar kapal (bentuk 3 sudut). Kertas kedua diletakkan di bawah untuk badan perahu (bentuk memanjang). Allah menyukai orang yang terampil dan rapi.", q: "Pasangkan bagian perahu dengan nama bangun yang tepat! (Sentuh nama, lalu sentuh fungsinya)", pairs: [ {nama: "Segitiga", fungsi: "Layar Perahu"}, {nama: "Persegi Panjang", fungsi: "Badan Perahu"} ] },
+            // Task 4: MC Kompleks (Konteks Binthe)
+            { type: 'mc', stimulus: "Ibu Fatimah memasak 'Binthe Biluhuta' (sup jagung khas Gorontalo). Ia menaburkan kelapa parut dan potongan daun bawang. Potongan daun bawang yang dipotong melintang bentuknya bundar (Lingkaran). Sedangkan papan talenan kayu yang ibu gunakan bentuknya segi empat.", q: "Manakah pernyataan yang BENAR? (Pilih satu yang paling tepat)", options: ["Talenan berbentuk Lingkaran", "Potongan daun bawang berbentuk Lingkaran", "Binthe Biluhuta terbuat dari batu bata"], ans: 1 },
+            // Task 5: MC (Konteks Kubah Masjid)
+            { type: 'mc', stimulus: "Masjid Agung Baiturrahim di pusat Kota Gorontalo sangat megah. Di atasnya terdapat kubah besar tempat muadzin mengumandangkan azan. Bentuk dasar kubah bagian bawah yang menempel pada atap datar membentuk garis lengkung tertutup.", q: "Alas dasar penyangga kubah masjid tersebut berbentuk bangun datar...", options: ["Segitiga", "Persegi", "Lingkaran"], ans: 2 },
+            // Task 6: Tap-to-Sort (Mengurai Balok)
+            { type: 'sort', stimulus: "Di Pelabuhan Gorontalo, ada peti kemas besar (Balok) berisi bantuan makanan. Peti kemas itu akan dibagikan ke 4 panti asuhan. Agar adil, pekerja membagi peti (Balok) besar tersebut menjadi 4 kotak kardus yang ukurannya sama panjang di semua sisinya.", q: "Urutkan proses mengurai bangun ruang ini dari yang terbesar ke terkecil dengan menyentuh pilihan di bawah secara berurutan!", items: ["Balok Besar (Peti Kemas)", "Balok Sedang (Dibagi 2)", "Kubus Kecil (Kardus Bantuan)"] },
+            // Task 7: MC (Batu Karang)
+            { type: 'mc', stimulus: "Taman Laut Olele di Gorontalo memiliki terumbu karang indah beraneka ragam. Ada karang yang bentuknya seperti pipa panjang yang tengahnya berlubang, tempat ikan kecil bersembunyi. Kita wajib bersyukur atas keindahan ciptaan Allah ini dengan tidak membuang sampah ke laut.", q: "Bentuk pipa panjang berongga pada terumbu karang menyerupai bangun ruang...", options: ["Tabung", "Kubus", "Bola"], ans: 0 },
+            // Task 8: MC (Bentuk Makanan)
+            { type: 'mc', stimulus: "Kue tradisional Gorontalo bernama 'Ilabulo' dibungkus daun pisang berbentuk memanjang sedikit pipih, ada juga kue 'Popolulu' yang terbuat dari ubi jalar yang dibentuk bulat-bulat dan digoreng manis. Mensyukuri rezeki makanan adalah perbuatan terpuji.", q: "Kue Popolulu yang dibentuk bulat-bulat sebelum digoreng menyerupai bangun ruang...", options: ["Balok", "Tabung", "Bola"], ans: 2 },
+            // Task 9: Tap-to-Match (Menyusun Rumah)
+            { type: 'match', stimulus: "Ahmad sedang menggambar pemandangan desa persawahan di Limboto. Ia menggambar sebuah rumah panggung kayu. Atapnya meruncing ke atas, pintunya lurus berdiri, dan jendelanya kotak sama sisi. Ia menggambar sambil mengingat bahwa rumah adalah tempat berlindung titipan Allah.", q: "Pasangkan bagian rumah dengan bangun datarnya! (Sentuh bangun, lalu sentuh posisinya)", pairs: [ {nama: "Persegi", fungsi: "Jendela Rumah"}, {nama: "Persegi Panjang", fungsi: "Pintu Rumah"} ] },
+            // Task 10: MC (Penyusunan Kompleks)
+            { type: 'mc', stimulus: "Buku pelajaran Matematika kelas 1 ditumpuk rapi oleh siswa MI Alkhairaat di meja guru. Satu buku bentuknya adalah balok tipis. Jika 10 buku yang sama besarnya ditumpuk ke atas menjadi tinggi,", q: "Tumpukan 10 buku tebal tersebut akan membentuk bangun ruang besar berupa...", options: ["Tabung", "Bola", "Balok (Lebih tinggi)"], ans: 2 }
+        ];
+
+        let matchState = { selectedA: null, matched: [] };
+        let sortState = { selected: [] };
+
+        function renderBermain() {
+            const task = dataBermain[state.bermain.currentTask];
+            $('bermain-counter').innerText = `${state.bermain.currentTask + 1}/10`;
+            $('bermain-bar').style.width = `${(state.bermain.currentTask / 10) * 100}%`;
+            matchState = { selectedA: null, matched: [] };
+            sortState = { selected: [] };
+
+            let html = `
+                <div class="bg-white rounded-2xl p-5 shadow-lg border-2 border-yellow-200 mb-6 slide-up">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-5 text-sm md:text-base text-gray-700 leading-relaxed text-justify">
+                        <p class="font-bold text-islamic-gold mb-2"><i class="fas fa-book-reader mr-2"></i>Ayo Membaca (Literasi):</p>
+                        ${task.stimulus}
+                    </div>
+                    <p class="font-bold text-lg text-gray-800 mb-4">${task.q}</p>
+                    <div id="bermain-interactive-area">
+            `;
+
+            if (task.type === 'mc') {
+                html += `<div class="space-y-3">`;
+                task.options.forEach((opt, i) => {
+                    html += `<button onclick="checkBermain('mc', ${i}, ${task.ans})" class="w-full text-left px-5 py-3 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 hover:border-blue-400 transition font-semibold text-blue-900">${String.fromCharCode(65+i)}. ${opt}</button>`;
+                });
+                html += `</div>`;
+            } else if (task.type === 'match') {
+                html += `<div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1 space-y-2" id="match-col-A">
+                                ${task.pairs.map((p, i) => `<button onclick="handleMatch('A', ${i})" id="btn-match-A-${i}" class="w-full py-3 bg-gray-100 border-2 border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-200">${p.nama}</button>`).sort(() => Math.random() - 0.5).join('')}
+                            </div>
+                            <div class="flex-1 space-y-2" id="match-col-B">
+                                ${task.pairs.map((p, i) => `<button onclick="handleMatch('B', ${i})" id="btn-match-B-${i}" class="w-full py-3 bg-green-50 border-2 border-green-300 rounded-xl font-bold text-islamic-green hover:bg-green-100">${p.fungsi}</button>`).sort(() => Math.random() - 0.5).join('')}
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-4"><i class="fas fa-hand-pointer mr-1"></i> Mode Sentuh: Sentuh kotak abu-abu, lalu sentuh kotak hijau untuk menjodohkan.</p>
+                        `;
+            } else if (task.type === 'sort') {
+                let shuffled = [...task.items].sort(() => Math.random() - 0.5);
+                html += `<div class="flex flex-wrap gap-2 mb-4" id="sort-source">
+                            ${shuffled.map((item, i) => `<button onclick="handleSort(this, '${item}')" class="px-4 py-2 bg-yellow-100 border-2 border-yellow-400 text-yellow-800 font-bold rounded-lg">${item}</button>`).join('')}
+                         </div>
+                         <div class="flex flex-col gap-2 p-4 bg-gray-100 rounded-xl min-h-[100px]" id="sort-target">
+                            <p class="text-sm text-gray-400 text-center italic" id="sort-placeholder">Pilihan akan bergeser ke sini sesuai urutan sentuhanmu...</p>
+                         </div>
+                         <button onclick="checkSort()" class="mt-4 w-full py-2 bg-islamic-green text-white font-bold rounded-lg hide" id="btn-cek-sort">Cek Urutan</button>
+                         `;
+            }
+            html += `</div></div>`;
+            $('bermain-content').innerHTML = html;
+        }
+
+        function checkBermain(type, answer, correct) {
+            let isCorrect = false;
+            if (type === 'mc') { isCorrect = (answer === correct); }
+
+            if (isCorrect) {
+                playSfx('correct');
+                state.bermain.correctAnswers++;
+                showFeedback(true);
+            } else {
+                playSfx('wrong');
+                showFeedback(false);
+            }
+        }
+
+        // Tap-to-Match Logic
+        function handleMatch(col, index) {
+            playSfx('click');
+            const task = dataBermain[state.bermain.currentTask];
+            const btn = $(`btn-match-${col}-${index}`);
+            if (btn.disabled) return;
+
+            if (col === 'A') {
+                // Deselect previous A
+                if (matchState.selectedA !== null) { $(`btn-match-A-${matchState.selectedA}`).classList.remove('selected-item'); }
+                matchState.selectedA = index;
+                btn.classList.add('selected-item');
+            } else if (col === 'B' && matchState.selectedA !== null) {
+                // Check match
+                if (matchState.selectedA === index) { // Correct pair (indices match based on original data array)
+                    const btnA = $(`btn-match-A-${matchState.selectedA}`);
+                    btnA.classList.replace('bg-gray-100', 'bg-green-500'); btnA.classList.replace('text-gray-700', 'text-white'); btnA.disabled = true; btnA.classList.remove('selected-item');
+                    btn.classList.replace('bg-green-50', 'bg-green-500'); btn.classList.replace('text-islamic-green', 'text-white'); btn.disabled = true;
+                    matchState.matched.push(index);
+                    matchState.selectedA = null;
+                    if (matchState.matched.length === task.pairs.length) {
+                        setTimeout(() => checkBermain('mc', 1, 1), 500); // Simulate correct
+                    }
+                } else {
+                    btn.classList.add('bg-red-200');
+                    setTimeout(() => btn.classList.remove('bg-red-200'), 500);
+                    matchState.selectedA = null;
+                    document.querySelectorAll('[id^="btn-match-A-"]').forEach(el => el.classList.remove('selected-item'));
+                }
+            }
+        }
+
+        // Tap-to-Sort Logic
+        function handleSort(btn, item) {
+            playSfx('click');
+            btn.classList.add('hide');
+            sortState.selected.push(item);
+            $('sort-placeholder').classList.add('hide');
+            
+            const targetDiv = $('sort-target');
+            const sortedItem = document.createElement('div');
+            sortedItem.className = "px-4 py-2 bg-islamic-gold text-white font-bold rounded-lg w-full text-center fade-in";
+            sortedItem.innerText = item;
+            targetDiv.appendChild(sortedItem);
+
+            const task = dataBermain[state.bermain.currentTask];
+            if (sortState.selected.length === task.items.length) {
+                show('btn-cek-sort');
+            }
+        }
+
+        function checkSort() {
+            const task = dataBermain[state.bermain.currentTask];
+            const isCorrect = JSON.stringify(sortState.selected) === JSON.stringify(task.items);
+            checkBermain('mc', isCorrect ? 1 : 0, 1);
+        }
+
+        function showFeedback(isCorrect) {
+            const area = $('bermain-interactive-area');
+            if (isCorrect) {
+                area.innerHTML = `<div class="text-center p-4 bg-green-50 rounded-xl border border-green-200 slide-up">
+                    <div class="text-4xl text-green-500 mb-2"><i class="fas fa-star"></i></div>
+                    <h4 class="font-bold text-green-700 mb-3">Hebat! Jawabanmu Tepat.</h4>
+                    <button onclick="playSfx('click'); nextBermain()" class="px-6 py-2 bg-islamic-green text-white font-bold rounded-lg">Soal Berikutnya <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>`;
+            } else {
+                area.innerHTML += `<div class="mt-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm text-center slide-up">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Ops, masih kurang tepat. Namun tidak apa-apa, mari lanjut berlatih!
+                    <button onclick="playSfx('click'); nextBermain()" class="mt-2 w-full px-4 py-2 bg-red-100 text-red-800 font-bold rounded-lg border border-red-300">Lanjut Soal <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>`;
+            }
+        }
+
+        function nextBermain() {
+            state.bermain.currentTask++;
+            if (state.bermain.currentTask >= 10) {
+                state.bermain.score = (state.bermain.correctAnswers / 10) * 100;
+                state.progress.bermain = true;
+                $('stat-bermain').innerText = `${state.bermain.score}%`;
+                
+                customAlert('Tantangan Selesai!', `Alhamdulillah, kamu berhasil menyelesaikan tahap Bermain dengan skor ${state.bermain.score}. Kunci menu BERLATIH telah dibuka!`, 'success', () => {
+                    updateMenuUI();
+                    navigateTo('main-menu');
+                });
+            } else {
+                renderBermain();
+            }
+        }
+
+
+        // --- 7. DATA BERLATIH (10 Tiered Questions) ---
+        const dataBerlatih = [
+            // Level 1: Dasar/Pemahaman (@8 Poin) - Soal 1-3
+            { level: 1, type: 'mc', stimulus: "Al-Qur'an menyebutkan keindahan langit yang berlapis-lapis dalam Surah Al-Mulk ayat 3. Keteraturan ciptaan Allah terlihat juga pada bentuk benda. Di sekolah, papan tulis digunakan guru untuk menulis. Permukaan papan tulis tersebut rata dan memiliki 4 sisi.", q: "Berdasarkan ciri-cirinya, papan tulis di kelas berbentuk bangun datar apa?", options: ["Lingkaran", "Segitiga", "Persegi Panjang"], ans: 2, bobot: 8 },
+            { level: 1, type: 'mc', stimulus: "Masyarakat pesisir Teluk Tomini gemar makan ikan Tuna segar. Ibu membeli piring baru untuk meletakkan ikan bakar. Pinggiran piring tersebut melengkung penuh tanpa ada sudut satupun. Ibu membersihkan piring dengan ikhlas karena kebersihan sebagian dari iman.", q: "Bangun datar yang tidak memiliki sudut sama sekali disebut...", options: ["Segitiga", "Lingkaran", "Persegi"], ans: 1, bobot: 8 },
+            { level: 1, type: 'mc', stimulus: "Pak Budi memanen jagung (Binthe) di ladangnya dekat Danau Limboto. Ia menyimpan hasil panen ke dalam karung, lalu menyusunnya di dalam gudang penyimpan. Gudang Pak Budi bentuknya memiliki panjang, lebar, dan tinggi seperti ruangan kelas.", q: "Ruang kelas dan gudang penyimpan umumnya berbentuk bangun ruang...", options: ["Tabung", "Balok", "Bola"], ans: 1, bobot: 8 },
+            // Level 2: Penerapan (@10 Poin) - Soal 4-7
+            { level: 2, type: 'mc', stimulus: "Siswa MI Alkhairaat mengikuti lomba menyusun balok kayu. Amir diberikan 2 balok kayu kecil yang bentuk dan ukurannya persis sama. Guru meminta Amir menumpuk balok yang satu di atas balok yang lain agar lebih tinggi. Kerja sama antar teman sangat penting dalam lomba ini.", q: "Jika 2 balok kayu yang sama ditumpuk ke atas, akan menjadi bangun ruang apa?", options: ["Balok (yang lebih besar/tinggi)", "Kubus", "Tabung"], ans: 0, bobot: 10 },
+            { level: 2, type: 'mc', stimulus: "Fatimah belajar mengurai bangun datar menggunakan kertas lipat warna-warni (origami). Ia memiliki kertas origami berbentuk persegi (kotak sama sisi). Ia kemudian melipat ujung sudut kanan atas ke ujung sudut kiri bawah hingga bertemu, dan mengguntingnya tepat di garis lipatan.", q: "Dua potongan kertas yang dihasilkan Fatimah sekarang berbentuk...", options: ["2 Persegi Panjang", "2 Lingkaran", "2 Segitiga"], ans: 2, bobot: 10 },
+            { level: 2, type: 'mc', stimulus: "Menjelang bulan Ramadhan, warga Gorontalo menyiapkan tiang-tiang bambu untuk tradisi pasang lampu (Tumbilotohe). Tiang bambu lurus itu ditancapkan ke tanah. Ayah memotong bambu tersebut. Permukaan bekas potongan bambu (bila dilihat dari atas) membentuk lingkaran.", q: "Secara keseluruhan, batang bambu lurus itu berbentuk bangun ruang...", options: ["Bola", "Tabung", "Balok"], ans: 1, bobot: 10 },
+            { level: 2, type: 'mc', stimulus: "Dalam kegiatan bakti sosial, sekolah membagikan sembako dalam kardus-kardus. Kardus A berbentuk kubus kecil. Kardus B berbentuk balok panjang. Zaidan dan teman-temannya membantu mengangkatnya. Mereka harus menyusun kardus di bak truk agar rapi dan muat banyak.", q: "Manakah susunan yang paling tepat agar tidak mudah jatuh?", options: ["Kardus diletakkan miring", "Kardus ditumpuk rapi rata pada sisi-sisi datarnya", "Kardus B diikat menjadi bola"], ans: 1, bobot: 10 },
+            // Level 3: HOTS (@12 Poin) - Soal 8-10
+            { level: 3, type: 'mc', stimulus: "Pada masa penjajahan, pahlawan Gorontalo, Nani Wartabone berjuang membela tanah air. Untuk berlindung, pejuang membuat pos dari susunan batu merah. Sebuah dinding pertahanan (persegi panjang) tersusun dari 10 batu bata panjang yang dideretkan menyamping. Jika dinding itu dibongkar/diurai karena sudah damai,", q: "Berapa banyak bangun balok kecil (batu bata) yang dihasilkan dari uraian dinding tersebut?", options: ["1 Balok besar", "5 Balok", "10 Balok kecil"], ans: 2, bobot: 12 },
+            { level: 3, type: 'mc', stimulus: "Perhatikan gambar pola pikir ini: Sebuah perahu tradisional nelayan digambar menggunakan 3 buah segitiga (1 untuk layar, 2 dirangkai untuk ujung badan perahu) dan 1 buah persegi panjang (untuk tengah badan perahu). Nelayan mencari ikan untuk menghidupi keluarga dengan halal.", q: "Berapa total jumlah bangun datar yang digunakan untuk menyusun gambar perahu secara lengkap?", options: ["2 bangun datar", "3 bangun datar", "4 bangun datar"], ans: 2, bobot: 12 },
+            { level: 3, type: 'mc', stimulus: "Di kawasan agraris Limboto, air irigasi dialirkan menggunakan pipa pralon (bentuk Tabung panjang). Petani ingin mengalirkan air ke dua petak sawah berbeda, sehingga ia menyambung pipa lurus tersebut dengan pipa berbentuk huruf 'T'. Ini adalah bentuk syukur memanfaatkan akal karunia Allah.", q: "Jika pipa 'T' itu diurai (dipisah penyambungnya), ia terdiri dari susunan...", options: ["2 buah Tabung", "2 buah Balok", "1 Tabung dan 1 Bola"], ans: 0, bobot: 12 }
+        ];
+
+        function renderBerlatih() {
+            const task = dataBerlatih[state.berlatih.currentTask];
+            $('berlatih-counter').innerText = `${state.berlatih.currentTask + 1}/10`;
+            $('berlatih-bar').style.width = `${(state.berlatih.currentTask / 10) * 100}%`;
+
+            let badgeClass = task.level === 1 ? 'bg-green-200 text-green-800' : task.level === 2 ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800';
+            let badgeText = task.level === 1 ? 'Level 1: Pemahaman' : task.level === 2 ? 'Level 2: Penerapan' : 'Level 3: HOTS';
+
+            let html = `
+                <div class="bg-white rounded-2xl p-5 shadow-lg border-2 border-blue-200 mb-6 slide-up relative">
+                    <span class="absolute -top-3 -right-3 px-3 py-1 text-xs font-bold rounded-full shadow-sm ${badgeClass}">${badgeText}</span>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-5 text-sm md:text-base text-gray-700 leading-relaxed text-justify">
+                        <p class="font-bold text-blue-800 mb-2"><i class="fas fa-align-left mr-2"></i>Stimulus Soal:</p>
+                        ${task.stimulus}
+                    </div>
+                    <p class="font-bold text-lg text-gray-800 mb-4">${task.q}</p>
+                    
+                    <div class="space-y-3" id="berlatih-options-area">
+                        ${task.options.map((opt, i) => `
+                            <button onclick="selectBerlatih(${i}, ${task.ans}, ${task.level}, ${task.bobot}, this)" class="w-full text-left px-5 py-3 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition font-semibold text-gray-700 btn-opt-berlatih">
+                                ${String.fromCharCode(65+i)}. ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            $('berlatih-content').innerHTML = html;
+        }
+
+        function selectBerlatih(selected, correct, level, bobot, btnElement) {
+            // Disable all buttons to prevent double clicking
+            const buttons = document.querySelectorAll('.btn-opt-berlatih');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = (selected === correct);
+            
+            // SIMPAN DATA JAWABAN UNTUK DIKIRIM KE GOOGLE SHEETS
+            const task = dataBerlatih[state.berlatih.currentTask];
+            state.berlatih.answers[state.berlatih.currentTask] = {
+                q: task.q,
+                jawaban_siswa: task.options[selected],
+                kunci: task.options[correct],
+                isCorrect: isCorrect
+            };
+
+            if (isCorrect) {
+                playSfx('correct');
+                btnElement.classList.replace('border-gray-200', 'border-green-500');
+                btnElement.classList.replace('bg-white', 'bg-green-100');
+                state.berlatih.score += bobot;
+                if(level===1) state.berlatih.l1++;
+                if(level===2) state.berlatih.l2++;
+                if(level===3) state.berlatih.l3++;
+            } else {
+                playSfx('wrong');
+                btnElement.classList.replace('border-gray-200', 'border-red-500');
+                btnElement.classList.replace('bg-white', 'bg-red-100');
+                // Highlight correct answer
+                buttons[correct].classList.replace('border-gray-200', 'border-green-500');
+                buttons[correct].classList.replace('bg-white', 'bg-green-50');
+            }
+
+            setTimeout(nextBerlatih, 1000); // Auto next after 1 sec
+        }
+
+        function nextBerlatih() {
+            state.berlatih.currentTask++;
+            if (state.berlatih.currentTask >= 10) {
+                state.progress.berlatih = true;
+                $('stat-nilai').innerText = state.berlatih.score;
+                
+                let pesan = state.berlatih.score >= 80 ? "Luar Biasa! Kemampuanmu sangat memuaskan." : 
+                            state.berlatih.score >= 60 ? "Cukup baik, mari tingkatkan lagi belajarnya!" : "Terus semangat mengulang materi ya!";
+                
+                customAlert('Evaluasi Selesai', `Skor akhirmu adalah ${state.berlatih.score}/100. ${pesan} Data sedang dikirim ke guru. Silakan cetak Laporan Hasil Belajarmu.`, 'success', () => {
+                    updateMenuUI();
+                    navigateTo('main-menu');
+                    populateReport();
+                    
+                    // PANGGIL FUNGSI KIRIM DATA KE GOOGLE SHEETS
+                    sendDataToGAS(); 
+                });
+            } else {
+                renderBerlatih();
+            }
+        }
+
+        // --- 8. INTEGRASI GOOGLE APPS SCRIPT (GAS) ---
+        function sendDataToGAS() {
+            if (GAS_URL === "URL_GAS_ANDA_DISINI" || !GAS_URL) {
+                console.warn("GAS_URL belum diatur. Lewati pengiriman data.");
+                return;
+            }
+
+            // Menyusun payload data yang akan dikirim
+            const payload = {
+                action: "save_data",
+                student: state.student,
+                bermainScore: state.bermain.score,
+                berlatihScore: state.berlatih.score,
+                benar: state.berlatih.answers.filter(a => a.isCorrect).length,
+                salah: state.berlatih.answers.filter(a => !a.isCorrect).length,
+                details: state.berlatih.answers,
+                // Mengirim referensi soal jika sheet Data Soal perlu di-generate
+                dataBerlatih: dataBerlatih,
+                dataBermain: dataBermain.filter(t => t.q) 
+            };
+
+            // Melakukan request POST dengan mode no-cors (aman dari blokir browser statis)
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log("Data berhasil terkirim ke Google Sheets.");
+            }).catch(err => {
+                console.error("Gagal mengirim data ke Google Sheets: ", err);
+            });
+        }
+
+        // --- 9. LAPORAN PDF ---
+        function populateReport() {
+            const d = new Date();
+            const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+            
+            $('rep-nama').innerText = state.student.name;
+            document.querySelectorAll('.rep-nama-panggil').forEach(el => el.innerText = state.student.name.split(' ')[0]);
+            $('rep-kelas').innerText = state.student.class;
+            $('rep-tanggal').innerText = dateStr;
+            document.querySelectorAll('.rep-tanggal-ttd').forEach(el => el.innerText = dateStr);
+            
+            $('rep-skor-main').innerText = state.bermain.score;
+            $('rep-skor-latih').innerText = state.berlatih.score;
+            
+            let predikat = "PERLU BIMBINGAN";
+            if(state.berlatih.score >= 90) predikat = "SANGAT BAIK (A)";
+            else if(state.berlatih.score >= 75) predikat = "BAIK (B)";
+            else if(state.berlatih.score >= 60) predikat = "CUKUP (C)";
+            $('rep-predikat').innerText = `Predikat: ${predikat}`;
+
+            $('rep-l1').innerText = `${state.berlatih.l1}/3`;
+            $('rep-l2').innerText = `${state.berlatih.l2}/4`;
+            $('rep-l3').innerText = `${state.berlatih.l3}/3`;
+        }
+
+        function generatePDF() {
+            playSfx('click');
+            const element = document.getElementById('report-container');
+            element.classList.remove('hide'); // Show momentarily for render
+            
+            customAlert('Menyiapkan Dokumen...', 'Silakan tunggu, sedang menyusun PDF...', 'info');
+
+            // Try html2pdf first
+            if (typeof html2pdf !== 'undefined') {
+                const opt = {
+                    margin:       10,
+                    filename:     `Laporan_MPI_${state.student.name.replace(/ /g,'_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.classList.add('hide');
+                    $('custom-alert').style.display = 'none';
+                }).catch(err => {
+                    console.error("PDF Error: ", err);
+                    fallbackPrint();
+                });
+            } else {
+                fallbackPrint();
+            }
+
+            function fallbackPrint() {
+                element.classList.add('hide'); // hide again before native print triggers
+                $('custom-alert').style.display = 'none';
+                window.print();
+            }
+        }
+    </script>
+</body>
+</html>
